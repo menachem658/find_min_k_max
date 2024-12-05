@@ -9,7 +9,7 @@ pip install find_min_k_max
 
 ## Usage
 ```python
-from statistical_computation import lower_edge, upper_edge
+from find_min_k_max import lower_edge, upper_edge
 
 # Example usage of functions
 n = 100
