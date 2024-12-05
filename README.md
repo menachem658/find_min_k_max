@@ -18,7 +18,7 @@ ab_size_vec = np.array([100])
 differences_list = []
 
 for k_max in k_max_values:
-    CI = CI_for_non_frequent_symbols(n, k_max, alpha * (1 - n / (ab_size_vec * (k_max + 1))))  # Adjust as needed
+    CI = CI_for_non_frequent_symbols(n, k_max, alpha * (1 - n / (ab_size_vec * (k_max + 1))))
     differences = CI[:, 1] - CI[:, 0] 
     differences_list.append(differences)
 
