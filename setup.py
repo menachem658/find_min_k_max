@@ -7,8 +7,8 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/username/find_min_k_max',
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='menachem sokolik',
+    author_email='menachemsokolik@gmail.com',
     license='MIT',
     packages=find_packages(),
     install_requires=[
