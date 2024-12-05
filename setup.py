@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="non_frequent_symbols",
+    name="find_min_k_max",
     version="0.1.0",
-    author="Your Name",
-    author_email="your_email@example.com",
+    author="menachem sokolik",
+    author_email="menachemsokolik@gmail.com",
     description="A Python package for statistical analysis of non-frequent symbols.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
