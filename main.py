@@ -1,14 +1,15 @@
 import math
 import numpy as np
 from scipy.special import comb
-import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
-from scipy.stats import multinomial, binom, norm
-import seaborn as sns
-sns.set(style="whitegrid", palette="muted")
+from scipy.stats import multinomial, binom, norm, beta
 
 
 def lower_edge(n, k, alph):
+
+    if alph <= 0 or alph >= 1:
+        raise ValueError('alpha must be in (0, 1), bounds excluded')
+        
     res = 10**-5
     m = np.arange(res, k-1-res, res)  
     t = m / (m + n - k)
@@ -24,6 +25,10 @@ def lower_edge(n, k, alph):
 
 
 def upper_edge(n, k, alph):
+    
+    if alph <= 0 or alph >= 1:
+        raise ValueError('alpha must be in (0, 1), bounds excluded')
+    
     res = 10**-3
     r = np.arange(1, 20 + res, res)  
     t = (r + k - 1) / (r + n - 1)
@@ -38,6 +43,10 @@ def upper_edge(n, k, alph):
 
 
 def CI_for_non_frequent_symbols(n, k_max, alph):
+
+    if alph <= 0 or alph >= 1:
+        raise ValueError('alpha must be in (0, 1), bounds excluded')
+        
     k_min = 0
     k_vec = np.arange(k_min, k_max + 1) 
     CI_marginals = np.zeros((len(k_vec), 2))
@@ -97,6 +106,35 @@ def CI_for_non_frequent_symbols(n, k_max, alph):
 
     return CI
 
+def binofit(successes, n, alpha):
+    """
+    Calculate binomial confidence intervals using the Clopper-Pearson method.
+    """
+    lower_bound = beta.ppf(alpha / 2, successes, n - successes + 1)
+    upper_bound = beta.ppf(1 - alpha / 2, successes + 1, n - successes)
+    return np.clip(lower_bound, 0, 1), np.clip(upper_bound, 0, 1)
+
+def compute_pci_mine(counts, alpha, k_max):
+    """
+    Compute the `pci_mine` (modified confidence intervals) given the counts `counts`, 
+    the number of trials `n`, and the significance level `alpha`.
+    """
+    n = counts.sum()
+    ab_size = len(counts)
+
+    CI = CI_for_non_frequent_symbols(n, k_max, alpha * (1 - n / (ab_size * (k_max + 1)))) 
+
+    # Compute naive binomial confidence intervals
+    pci_naive = np.array([binofit(x, n, alpha / ab_size) for x in counts])
+    pci_naive = np.stack(pci_naive)
+    
+    # Modify the naive confidence intervals based on the counts
+    pci_mine = pci_naive.copy()
+    for ind in range(k_max + 1):
+        mask = counts == ind  
+        pci_mine[mask, :] = np.tile(CI[ind, :], (np.sum(mask), 1)) 
+    
+    return pci_mine
 
 def expected_max_E_ri(n, i):
     def bound_function(t):
