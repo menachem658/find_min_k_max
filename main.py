@@ -106,18 +106,37 @@ def CI_for_non_frequent_symbols(n, k_max, alph):
 
     return CI
 
-def binofit(successes, n, alpha):
+def binofit(count, n, alpha):
     """
     Calculate binomial confidence intervals using the Clopper-Pearson method.
+
+    Parameters
+    ----------
+    count : Number of observations in category.
+    alpha : float in (0, 1), optional
+        Significance level, defaults to 0.05.
+    n : total observations
     """
-    lower_bound = beta.ppf(alpha / 2, successes, n - successes + 1)
-    upper_bound = beta.ppf(1 - alpha / 2, successes + 1, n - successes)
+    lower_bound = beta.ppf(alpha / 2, count, n - count + 1)
+    upper_bound = beta.ppf(1 - alpha / 2, count + 1, n - count)
     return np.clip(lower_bound, 0, 1), np.clip(upper_bound, 0, 1)
 
 def compute_pci_mine(counts, alpha, k_max):
     """
-    Compute the `pci_mine` (modified confidence intervals) given the counts `counts`, 
-    the number of trials `n`, and the significance level `alpha`.
+    Confidence intervals for multinomial proportions.
+
+    Parameters
+    ----------
+    counts : array_like of int, 1-D
+        Number of observations in each category.
+    alpha : float in (0, 1), optional
+        Significance level, defaults to 0.05.
+
+    Returns
+    -------
+    confint : ndarray, 2-D
+        Array of [lower, upper] confidence levels for each category, such that
+        overall coverage is (approximately) `1-alpha`.
     """
     n = counts.sum()
     ab_size = len(counts)
