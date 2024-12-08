@@ -7,9 +7,7 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'numpy',
-        'scipy',
-        'matplotlib',
-        'seaborn'
+        'scipy'
     ],
     author='menachem sokolik',
     author_email='menachemsokolik@gmail.com',
