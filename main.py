@@ -5,60 +5,57 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import multinomial, binom, norm, beta
 
 
-def lower_edge(n, k, alph):
+def lower_edge(n, k, alpha):
 
-    if alph <= 0 or alph >= 1:
+    if alpha <= 0 or alpha >= 1:
         raise ValueError('alpha must be in (0, 1), bounds excluded')
         
-    res = 10**-5
+    res = 1e-5
     m = np.arange(res, k-1-res, res)  
     t = m / (m + n - k)
     
     binom_pdf = binom.pmf(k, n, t) 
-    obj = (alph / (binom_pdf * t**(m - k)))**(1 / (k - 1 - m))
+    obj = (alpha / (binom_pdf * t**(m - k)))**(1 / (k - 1 - m))
     
     a = np.max(obj)
-    ind = np.argmax(obj)
-    m_opt = m[ind]
+    m_opt = m[np.argmax(obj)]
     
     return a, m_opt
 
 
-def upper_edge(n, k, alph):
+def upper_edge(n, k, alpha):
     
-    if alph <= 0 or alph >= 1:
+    if alpha <= 0 or alpha >= 1:
         raise ValueError('alpha must be in (0, 1), bounds excluded')
     
-    res = 10**-3
+    res = 1e-3
     r = np.arange(1, 20 + res, res)  
     t = (r + k - 1) / (r + n - 1)
     
-    obj = (binom.pmf(k, n, t) * t**(r - 1) / alph)**(1 / r)
+    obj = (binom.pmf(k, n, t) * t**(r - 1) / alpha)**(1 / r)
     
     b = np.min(obj)
-    ind = np.argmin(obj)
-    r_opt = r[ind]
+    r_opt = r[np.argmin(obj)]
     
     return b, r_opt
 
 
-def CI_for_non_frequent_symbols(n, k_max, alph):
+def CI_for_non_frequent_symbols(n, k_max, alpha):
 
-    if alph <= 0 or alph >= 1:
+    if alpha <= 0 or alpha >= 1:
         raise ValueError('alpha must be in (0, 1), bounds excluded')
         
-    k_min = 0
-    k_vec = np.arange(k_min, k_max + 1) 
+    k_vec = np.arange(0, k_max + 1) 
     CI_marginals = np.zeros((len(k_vec), 2))
     r_vec = np.zeros(len(k_vec))
     m_vec = np.zeros(len(k_vec))
 
     for k_ind, k in enumerate(k_vec):
         if k >= 2:
-            b, r_opt = upper_edge(n, k, alph / 2)
-            a, m_opt = lower_edge(n, k, alph / 2)
+            b, r_opt = upper_edge(n, k, alpha / 2)
+            a, m_opt = lower_edge(n, k, alpha / 2)
         else:
-            b, r_opt = upper_edge(n, k, alph)
+            b, r_opt = upper_edge(n, k, alpha)
             a = 0
             m_opt = -3
 
@@ -68,9 +65,9 @@ def CI_for_non_frequent_symbols(n, k_max, alph):
         m_vec[k_ind] = m_opt
 
     # Resolution for c and t
-    c_res = 10**-3
+    c_res = 1e-3
     c_vec = np.arange(1, 10 + c_res, c_res)
-    t_res = 10**-6
+    t_res = 1e-6
     t = np.arange(t_res, 1 - t_res, t_res)
 
     ind = 0
@@ -92,7 +89,7 @@ def CI_for_non_frequent_symbols(n, k_max, alph):
             obj += binom.pmf(k, n, t) * (term1 + term2)
 
         max_obj = np.max(obj)
-        if max_obj < alph:
+        if max_obj < alpha:
             done = True
         else:
             ind += 1
