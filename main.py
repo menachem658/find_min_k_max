@@ -161,13 +161,22 @@ def expected_max_E_ri(n, i):
     result = minimize_scalar(lambda t: -bound_function(t), bounds=(0, 1), method='bounded')
     return -result.fun
 
-def expected_log_S_with_max_E_ri(n, alpha, k_max, differences, m):
+def expected_log_S_with_max_E_ri(counts, alpha, k_max):
+    """
+    Compute the expected log term with max expectations of E_ri.
+    """
+    n = counts.sum()
+    ab_size = len(counts)
+
+    CI = CI_for_non_frequent_symbols(n, k_max, alpha * (1 - n / (ab_size * (k_max + 1))))
+    differences = CI[:, 1] - CI[:, 0]
+
     expectations = [expected_max_E_ri(n, i) for i in range(k_max + 1)]
-    
-    Z_value = norm.ppf(1 - alpha / m)
+
+    Z_value = norm.ppf(1 - alpha / ab_size)
     log_Z_term = math.log(Z_value * math.sqrt(1 / n))
-    
-    summation_term = sum(expectations[i] * math.log(differences[i]) for i in range(k_max + 1))
-    remaining_term = log_Z_term * (n - sum(expectations))
-    
+
+    summation_term = np.sum(expectations * np.log(differences))
+    remaining_term = log_Z_term * (n - np.sum(expectations))
+
     return summation_term + remaining_term
